@@ -16,10 +16,6 @@ warnings.filterwarnings('ignore')
 
 
 
-from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.colors import is_color_like
-
-
 # pip install networkx
 import networkx as nx
 from networkx.readwrite import json_graph
@@ -34,8 +30,6 @@ import plotly.graph_objects as go
 import pydot
 import graphviz
 
-from mlxtend.frequent_patterns import apriori
-from mlxtend.frequent_patterns import association_rules
 
 
 import dash

@@ -6,3 +6,9 @@ dash_renderer
 numpy
 pandas
 plotly
+
+scipy
+networkx
+
+pydot
+graphviz
