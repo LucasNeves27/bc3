@@ -52,16 +52,16 @@ DIV_COLORS = ['#e06666', '#e68d8d', '#ebb1b1', '#efd3d3', '#f4f4f4', '#bed3da', 
 
 UMP_COLORS = ['#22446D', '#FC9E4F', '#AB2346' ,'#6ABB5D']
 
-DEFAULT_PALETTE = sns.color_palette(COLORS)
-CONTRAST_PALETTE = sns.color_palette(CONTRAST_COLORS)
-DIVERGENT_PALETTE = sns.color_palette(DIV_COLORS)
-CAT_PALETTE = sns.color_palette(CAT_COLORS)
-UMP_PALETTE = sns.color_palette(UMP_COLORS)
+#DEFAULT_PALETTE = sns.color_palette(COLORS)
+#CONTRAST_PALETTE = sns.color_palette(CONTRAST_COLORS)
+#DIVERGENT_PALETTE = sns.color_palette(DIV_COLORS)
+#CAT_PALETTE = sns.color_palette(CAT_COLORS)
+#UMP_PALETTE = sns.color_palette(UMP_COLORS)
 
 
-DIV_CMAP = LinearSegmentedColormap.from_list("div_colors", DIV_COLORS)
-CAT_CMAP = LinearSegmentedColormap.from_list("cat_colors", CAT_COLORS)
-UMP_CMAP = LinearSegmentedColormap.from_list("ump_colors", UMP_COLORS)
+#DIV_CMAP = LinearSegmentedColormap.from_list("div_colors", DIV_COLORS)
+#CAT_CMAP = LinearSegmentedColormap.from_list("cat_colors", CAT_COLORS)
+#UMP_CMAP = LinearSegmentedColormap.from_list("ump_colors", UMP_COLORS)
 
 
 SHOW_PLOTS = True
