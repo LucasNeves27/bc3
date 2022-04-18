@@ -14,3 +14,5 @@ pydot
 graphviz
 matplotlib
 seaborn
+
+sklearn
