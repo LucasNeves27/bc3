@@ -43,6 +43,12 @@ import pandas as pd
 import plotly.graph_objs as go
 
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from itertools import combinations
+
+
+
 ####################### Colors 
 COLORS = ['#e06666', '#e88b81', '#f0ad9a', '#f8ceb2', '#ffeeca', '#c6cfbf', '#8fb0ae', '#58919d', '#20718b']
 
@@ -183,15 +189,79 @@ def read_json_file(filename):
     return json_graph.node_link_graph(js_graph)
 
 
-################ Aesthetics 
+def basket_recommendations(i, sim_df, cols, customer, k=5):
+    
+    ix = sim_df.loc[:,i].to_numpy().argpartition(range(-1,-k,-1))
+    closest = sim_df.columns[ix[-1:-(k+2):-1]]
+    closest = closest.drop(i, errors='ignore')
+    
+    recs = pd.DataFrame(closest).merge(cols)
+    recs = recs.loc[recs.CustomerID != customer]
+    
+    return recs.head(k)
+def create_basket(items, customer=99999999):
+    """
+    create an "invoice"
+    """
+    return pd.DataFrame(data={'InvoiceNo': [0], 'CustomerID':[customer], 'Description': [(',').join(items)], 'combined': [(' ').join(items)],  })
+
+new_basket = create_basket(['towel design', 'alarm clock bakelike']) 
+#pd.concat([df_inv, new_basket])
 
 
-#sns.set(style="white")
-#sns.set_context("paper")
-#sns.set_palette(DEFAULT_PALETTE)
-#plt.rcParams['figure.dpi'] = 128
+def vectorize_invoices(df):
+    tf = TfidfVectorizer(analyzer=lambda s: (c for i in range(1,3)
+                                    for c in combinations(s.split(','), r=i)))
+
+    tfidf_matrix = tf.fit_transform(df['Description'])
+    
+    return tfidf_matrix
+
+## 
+## tfidf_matrix = vectorize_invoices(merged_inv, 'Description')
+## 
+
+def make_cosine_matrix(mx, idx ):
+    cosine_sim = cosine_similarity(mx)
+    cosine_sim_df = pd.DataFrame(cosine_sim, index=idx, columns=idx)
+    return cosine_sim_df
+
+## 
+## cosine_sim_df = make_cosine_matrix(tfidf_matrix, merged_inv['InvoiceNo'])
+## 
 
 
+def get_similar_baskets(items, invoices, customerid=-99999999, k=5, idx='InvoiceNo'):
+    new_basket = create_basket(items, customerid)
+    
+    inv_ = pd.concat([invoices, new_basket])
+    
+
+    
+    ## vectorize invoices
+    tfidf_matrix = vectorize_invoices(inv_)
+    
+    ## make similarity matrix
+    similarity_matrix = make_cosine_matrix(tfidf_matrix, inv_[idx])
+    
+    i = new_basket['InvoiceNo'][0]
+    
+    ix = similarity_matrix.loc[:,i].to_numpy().argpartition(range(-1,-k,-1))
+
+    closest = similarity_matrix.columns[ix[-1:-(k+2):-1]]
+    closest = closest.drop(i, errors='ignore')
+    
+    recs = pd.DataFrame(closest).merge(inv_[['InvoiceNo', 'Description', 'CustomerID']])
+    recs = recs.loc[recs.CustomerID != customerid]
+    
+    
+    return recs
+
+def get_product_recs(similar_baskets, items):
+    basket_contents = list(set(','.join(similar_baskets['Description'].tolist()).split(',')))
+    diff = list(set(basket_contents) - set(items))
+    
+    return diff
 
 
 
@@ -206,7 +276,6 @@ nxload_rt = read_json_file(DATA_PATH + 'nxdump_rt.json')
 nodes_rt = [node for node in nxload_rt.nodes()]
 
 pos_rt = nx.spring_layout(nxload_rt, k=5, weight='weight')
-#pos_rt = nx.nx_pydot.graphviz_layout(nxload_rt, prog="neato")
 
 
 edge_trace_rt, node_trace_rt = make_graph(nxload_rt, pos_rt, nodes_rt)
@@ -217,21 +286,40 @@ nxload_ws = read_json_file(DATA_PATH + 'nxdump_ws.json')
 nodes_ws = [node for node in nxload_ws.nodes()]
 
 pos_ws = nx.spring_layout(nxload_ws, k=5, weight='weight')
-#pos_ws = nx.nx_pydot.graphviz_layout(nxload_ws, prog="neato")
 
 
 edge_trace_ws, node_trace_ws = make_graph(nxload_ws, pos_ws, nodes_ws)
 fig_ws = make_figure(edge_trace_ws, node_trace_ws, "Graph of Most Frequent Wholesale Customer Purchases")
 
+################ products ################
 
-dropdown_cc = dcc.Dropdown(
-       id='cc_drop',
-       options=optionslist,
-       multi=False,
-       value='Foo'
+LIMIT_INVOICES = 200
+
+df = pd.read_csv(DATA_PATH+'data_cleaned.csv')
+df = df.loc[df['IsCancelled'] == False]
+
+invoice_list = df['InvoiceNo'].unique()[0:LIMIT_INVOICES]
+
+df_inv = df.loc[df['InvoiceNo'].isin(invoice_list)]
+
+
+products_list = df_inv['Description'].unique()
+new_items = ['towel design']
+
+
+products_dropdown = dcc.Dropdown(
+       id='products_dropdown',
+       options=products_list,
+       multi=True,
+       value=new_items
    )
 
-c = pd.read_csv('data/test.csv')
+
+################ TFIDF ################
+
+
+
+product_recs_div = html.Div([])
 
 ################ APP ################
 
@@ -241,8 +329,25 @@ server = app.server
 
 
 app.layout = html.Div([
-
     html.Div([
+
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H2("Select Products"),
+                    products_dropdown
+                ], className='col'),
+                html.Div([
+                    html.H2("You might like:"),
+                    html.H3("Other Customers Also Bought:"),
+                    html.Div(id="product_recs_div"),
+                ], className='col'),
+
+            ], className='row'),
+            html.Div([], className='row'),
+        ], className="card"),
+
+
         html.Div([
             html.Div([
                 html.Div([
@@ -260,7 +365,24 @@ app.layout = html.Div([
 
 ])
 
+################ Callbacks ################
 
+
+@app.callback(
+    Output('product_recs_div', 'children'),
+    Input('products_dropdown', 'value'),
+
+)
+def show_recommendations(new_items):
+
+    similar_baskets = get_similar_baskets(new_items, df_inv )
+    product_recs = get_product_recs(similar_baskets, new_items)
+
+    product_list_result = html.Ul(
+        [html.Li(i) for i in product_recs[0:10]]
+    )
+
+    return html.Div(product_list_result)
 
 
 if __name__ == '__main__':
