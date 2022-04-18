@@ -1,3 +1,17 @@
 .card {
     margin: 3em 0;
 }
+
+#product_recs_div ul {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#product_recs_div li {
+    margin: .25em;
+    padding: .25em 1em;
+    border-radius: .25em;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}

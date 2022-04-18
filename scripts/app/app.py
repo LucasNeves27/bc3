@@ -276,7 +276,8 @@ nxload_rt = read_json_file(DATA_PATH + 'nxdump_rt.json')
 nodes_rt = [node for node in nxload_rt.nodes()]
 
 pos_rt = nx.spring_layout(nxload_rt, k=5, weight='weight')
-
+#pos_rt = nx.graphviz_layout(nxload_rt, prog='neato')
+#graphviz_layout(G, prog='neato', root=None, args='')[source]
 
 edge_trace_rt, node_trace_rt = make_graph(nxload_rt, pos_rt, nodes_rt)
 fig_rt = make_figure(edge_trace_rt, node_trace_rt, "Graph of Most Frequent Retail Customer Purchases")
@@ -304,7 +305,7 @@ df_inv = df.loc[df['InvoiceNo'].isin(invoice_list)]
 
 
 products_list = df_inv['Description'].unique()
-new_items = ['towel design']
+new_items = ['lunch bag retrospot', 'love heart tlights']
 
 
 products_dropdown = dcc.Dropdown(
@@ -338,8 +339,7 @@ app.layout = html.Div([
                     products_dropdown
                 ], className='col'),
                 html.Div([
-                    html.H2("You might like:"),
-                    html.H3("Other Customers Also Bought:"),
+                    html.H2("Other Customers Also Bought:"),
                     html.Div(id="product_recs_div"),
                 ], className='col'),
 
@@ -379,7 +379,7 @@ def show_recommendations(new_items):
     product_recs = get_product_recs(similar_baskets, new_items)
 
     product_list_result = html.Ul(
-        [html.Li(i) for i in product_recs[0:10]]
+        [html.Li(i) for i in product_recs[0:8]]
     )
 
     return html.Div(product_list_result)
