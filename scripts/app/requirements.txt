@@ -13,3 +13,4 @@ networkx
 pydot
 graphviz
 matplotlib
+seaborn

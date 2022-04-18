@@ -3,6 +3,7 @@ import numpy as np
 import scipy as sp
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 import scipy.stats as stats
 from math import ceil
 from datetime import timedelta, datetime
@@ -185,10 +186,10 @@ def read_json_file(filename):
 ################ Aesthetics 
 
 
-sns.set(style="white")
-sns.set_context("paper")
-sns.set_palette(DEFAULT_PALETTE)
-plt.rcParams['figure.dpi'] = 128
+#sns.set(style="white")
+#sns.set_context("paper")
+#sns.set_palette(DEFAULT_PALETTE)
+#plt.rcParams['figure.dpi'] = 128
 
 
 
