@@ -204,20 +204,24 @@ def read_json_file(filename):
 ## Retail
 nxload_rt = read_json_file(DATA_PATH + 'nxdump_rt.json')
 nodes_rt = [node for node in nxload_rt.nodes()]
-pos_rt = nx.nx_pydot.graphviz_layout(nxload_rt, prog="neato")
+
+pos_rt = nx.spring_layout(nxload_rt, k=5, weight='weight')
+#pos_rt = nx.nx_pydot.graphviz_layout(nxload_rt, prog="neato")
 
 
 edge_trace_rt, node_trace_rt = make_graph(nxload_rt, pos_rt, nodes_rt)
-fig_rt = make_figure(edge_trace_rt, node_trace_rt, "Graph of Retail Customer Purchases")
+fig_rt = make_figure(edge_trace_rt, node_trace_rt, "Graph of Most Frequent Retail Customer Purchases")
 
 ## Wholesale
 nxload_ws = read_json_file(DATA_PATH + 'nxdump_ws.json')
 nodes_ws = [node for node in nxload_ws.nodes()]
-pos_ws = nx.nx_pydot.graphviz_layout(nxload_ws, prog="neato")
+
+pos_ws = nx.spring_layout(nxload_ws, k=5, weight='weight')
+#pos_ws = nx.nx_pydot.graphviz_layout(nxload_ws, prog="neato")
 
 
 edge_trace_ws, node_trace_ws = make_graph(nxload_ws, pos_ws, nodes_ws)
-fig_ws = make_figure(edge_trace_ws, node_trace_ws, "Graph of Wholesale Customer Purchases")
+fig_ws = make_figure(edge_trace_ws, node_trace_ws, "Graph of Most Frequent Wholesale Customer Purchases")
 
 
 dropdown_cc = dcc.Dropdown(
